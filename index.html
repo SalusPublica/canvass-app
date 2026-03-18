@@ -5,11 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Canvass App</title>
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   </head>
   <body>
 
     <h1>Canvass Coordinator</h1>
-    <p>Welcome to your campaign's canvassing hub.</p>
+
+    <!-- MAP -->
+    <section id="map-section">
+      <h2>Canvassing Map</h2>
+      <div id="map"></div>
+    </section>
+
+    <!-- VISIT LOGGING FORM -->
+    <section id="log-section">
+      <h2>Log a Visit</h2>
+      <form id="visit-form">
+
+        <label for="address">Address</label>
+        <input type="text" id="address" placeholder="e.g. Mannerheimintie 5" required />
+
+        <label for="date">Date</label>
+        <input type="date" id="date" required />
+
+        <label for="visit-type">Type of visit</label>
+        <select id="visit-type">
+          <option value="knock">Door knock</option>
+          <option value="leaflet">Leaflet drop</option>
+        </select>
+
+        <label for="answered" id="answered-label">Did anyone answer?</label>
+        <select id="answered">
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+
+        <button type="submit">Log Visit</button>
+
+      </form>
+    </section>
+
+    <!-- VISIT LIST -->
+    <section id="visits-section">
+      <h2>Visits Logged</h2>
+      <ul id="visit-list">
+        <p id="empty-message">No visits logged yet.</p>
+      </ul>
+    </section>
 
     <script src="script.js"></script>
   </body>
