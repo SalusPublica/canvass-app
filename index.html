@@ -18,6 +18,33 @@
       <div id="map"></div>
     </section>
 
+    <!-- MAP CLICK POPUP -->
+    <div id="map-popup" style="display:none;">
+      <div id="map-popup-inner">
+        <h3>Log a visit</h3>
+        <p id="map-popup-address">Fetching address...</p>
+
+        <label for="map-visit-type">Type of visit</label>
+        <select id="map-visit-type">
+          <option value="knock">Door knock</option>
+          <option value="leaflet">Leaflet drop</option>
+        </select>
+
+        <div id="map-answered-container">
+          <label for="map-answered">Did anyone answer?</label>
+          <select id="map-answered">
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+
+        <div id="map-popup-buttons">
+          <button id="map-popup-confirm">Log Visit</button>
+          <button id="map-popup-cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+
     <!-- VISIT LOGGING FORM -->
     <section id="log-section">
       <h2>Log a Visit</h2>

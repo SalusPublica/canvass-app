@@ -6,6 +6,86 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
+// Track the coordinates from a map click
+let pendingLatLng = null;
+
+// Get references to the popup elements
+const mapPopup = document.getElementById('map-popup');
+const mapPopupAddress = document.getElementById('map-popup-address');
+const mapVisitType = document.getElementById('map-visit-type');
+const mapAnswered = document.getElementById('map-answered');
+const mapAnsweredContainer = document.getElementById('map-answered-container');
+
+// Show/hide the answered field in the popup based on visit type
+mapVisitType.addEventListener('change', function() {
+  mapAnsweredContainer.style.display =
+    mapVisitType.value === 'leaflet' ? 'none' : 'block';
+});
+
+// Listen for clicks on the map
+map.on('click', function(e) {
+  pendingLatLng = e.latlng;
+  mapPopupAddress.textContent = 'Fetching address...';
+  mapPopup.style.display = 'flex';
+
+  // Reverse geocode the clicked coordinates
+  const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${e.latlng.lat}&lon=${e.latlng.lng}`;
+
+  fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      const house = data.address.house_number || '';
+      const road = data.address.road || 'Unknown street';
+      const unit = data.address.unit ? ` ${data.address.unit}` : '';
+      mapPopupAddress.textContent = `${road} ${house}${unit}`.trim();
+    })
+    .catch(() => {
+      mapPopupAddress.textContent = 'Could not fetch address';
+    });
+});
+
+// Handle the confirm button
+document.getElementById('map-popup-confirm').addEventListener('click', function() {
+  if (!pendingLatLng) return;
+
+  const address = mapPopupAddress.textContent;
+  const visitType = mapVisitType.value;
+  const answered = visitType === 'knock' ? mapAnswered.value : 'n/a';
+  const date = new Date().toISOString().split('T')[0];
+
+  const visit = { address, date, visitType, answered };
+  visits.push(visit);
+  localStorage.setItem('visits', JSON.stringify(visits));
+
+  // Add to the list and place marker at exact clicked coordinates
+  addVisitToList(visit);
+
+  // Override the geocoded marker with one at the exact click location
+  const color = visitType === 'leaflet' ? 'blue' :
+                answered === 'yes' ? 'green' : 'grey';
+
+  L.circleMarker(pendingLatLng, {
+    radius: 8,
+    fillColor: color,
+    color: '#fff',
+    weight: 2,
+    opacity: 1,
+    fillOpacity: 0.9
+  })
+  .bindPopup(`<b>${address}</b><br>${visitType === 'leaflet' ? '📬 Leaflet drop' : answered === 'yes' ? '🚪 Answered' : '🚪 No answer'}`)
+  .addTo(map);
+
+  // Close the popup
+  mapPopup.style.display = 'none';
+  pendingLatLng = null;
+});
+
+// Handle the cancel button
+document.getElementById('map-popup-cancel').addEventListener('click', function() {
+  mapPopup.style.display = 'none';
+  pendingLatLng = null;
+});
+
 // Load saved visits from localStorage, or start with an empty array
 const visits = JSON.parse(localStorage.getItem('visits')) || [];
 
