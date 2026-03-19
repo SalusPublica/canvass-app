@@ -5,8 +5,9 @@ const map = L.map('map').setView([60.1699, 24.9384], 12);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© OpenStreetMap contributors'
 }).addTo(map);
-// Store all visits in an array
-const visits = [];
+
+// Load saved visits from localStorage, or start with an empty array
+const visits = JSON.parse(localStorage.getItem('visits')) || [];
 
 // Get references to the HTML elements we need
 const form = document.getElementById('visit-form');
@@ -41,6 +42,9 @@ form.addEventListener('submit', function(event) {
   const visit = { address, date, visitType, answered };
   visits.push(visit);
 
+  // Save the updated visits array to localStorage
+  localStorage.setItem('visits', JSON.stringify(visits));
+
   // Add it to the visible list on the page
   addVisitToList(visit);
 
@@ -65,11 +69,12 @@ function addVisitToList(visit) {
   }
 
   visitList.appendChild(li);
+
   // Add a marker on the map for this visit
   geocodeAddress(visit.address, visit.visitType, visit.answered);
 }
+
 function geocodeAddress(address, visitType, answered) {
-  // Ask OpenStreetMap's free geocoding service to convert the address to coordinates
   const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address + ', Finland')}`;
 
   fetch(url)
@@ -83,11 +88,9 @@ function geocodeAddress(address, visitType, answered) {
       const lat = parseFloat(data[0].lat);
       const lon = parseFloat(data[0].lon);
 
-      // Choose marker colour based on visit type and outcome
       const color = visitType === 'leaflet' ? 'blue' :
                     answered === 'yes' ? 'green' : 'grey';
 
-      // Add a circle marker at the address location
       L.circleMarker([lat, lon], {
         radius: 8,
         fillColor: color,
@@ -101,3 +104,11 @@ function geocodeAddress(address, visitType, answered) {
     })
     .catch(error => console.log('Geocoding error:', error));
 }
+
+// Load any previously saved visits when the page opens
+function loadSavedVisits() {
+  if (visits.length === 0) return;
+  visits.forEach(visit => addVisitToList(visit));
+}
+
+loadSavedVisits();
