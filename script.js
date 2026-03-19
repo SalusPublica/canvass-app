@@ -1,3 +1,41 @@
+const SERVER = 'http://localhost:3000';
+
+// Check if already logged in
+if (localStorage.getItem('loggedIn') === 'true') {
+  showApp();
+}
+
+document.getElementById('login-button').addEventListener('click', async function() {
+  const code = document.getElementById('team-code-input').value;
+
+  const response = await fetch(`${SERVER}/api/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code })
+  });
+
+  const data = await response.json();
+
+  if (data.success) {
+    localStorage.setItem('loggedIn', 'true');
+    showApp();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+  }
+});
+
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
+  loadVisitsFromServer();
+}
+
+async function loadVisitsFromServer() {
+  const response = await fetch(`${SERVER}/api/visits`);
+  const serverVisits = await response.json();
+  serverVisits.forEach(visit => addVisitToList(visit));
+}
+
 // Initialise the map, centred on Helsinki
 const map = L.map('map').setView([60.1699, 24.9384], 12);
 
@@ -53,27 +91,26 @@ document.getElementById('map-popup-confirm').addEventListener('click', function(
   const answered = visitType === 'knock' ? mapAnswered.value : 'n/a';
   const date = new Date().toISOString().split('T')[0];
 
-  const visit = { address, date, visitType, answered };
+  const visit = { address, date, visitType, answered, lat: pendingLatLng.lat, lon: pendingLatLng.lng };
   visits.push(visit);
   localStorage.setItem('visits', JSON.stringify(visits));
+  saveVisitToServer(visit);
 
-  // Add to the list and place marker at exact clicked coordinates
-  addVisitToList(visit);
+  // Add to the visit list
+  emptyMessage.style.display = 'none';
+  const li = document.createElement('li');
+  const formattedDate = new Date(visit.date).toLocaleDateString('fi-FI');
+  if (visit.visitType === 'leaflet') {
+    li.classList.add('answered-no');
+    li.textContent = `${formattedDate} — ${visit.address} — 📬 Leaflet drop`;
+  } else {
+    li.classList.add(visit.answered === 'yes' ? 'answered-yes' : 'answered-no');
+    li.textContent = `${formattedDate} — ${visit.address} — ${visit.answered === 'yes' ? '🚪 Answered ✓' : '🚪 No answer'}`;
+  }
+  visitList.appendChild(li);
 
-  // Override the geocoded marker with one at the exact click location
-  const color = visitType === 'leaflet' ? 'blue' :
-                answered === 'yes' ? 'green' : 'grey';
-
-  L.circleMarker(pendingLatLng, {
-    radius: 8,
-    fillColor: color,
-    color: '#fff',
-    weight: 2,
-    opacity: 1,
-    fillOpacity: 0.9
-  })
-  .bindPopup(`<b>${address}</b><br>${visitType === 'leaflet' ? '📬 Leaflet drop' : answered === 'yes' ? '🚪 Answered' : '🚪 No answer'}`)
-  .addTo(map);
+  // Place marker directly using the click coordinates — no geocoding needed
+  addMarkerToMap(pendingLatLng.lat, pendingLatLng.lng, visitType, answered, address);
 
   // Close the popup
   mapPopup.style.display = 'none';
@@ -124,6 +161,7 @@ form.addEventListener('submit', function(event) {
 
   // Save the updated visits array to localStorage
   localStorage.setItem('visits', JSON.stringify(visits));
+saveVisitToServer(visit);
 
   // Add it to the visible list on the page
   addVisitToList(visit);
@@ -133,10 +171,8 @@ form.addEventListener('submit', function(event) {
 });
 
 function addVisitToList(visit) {
-  // Hide the "no visits yet" message
   emptyMessage.style.display = 'none';
 
-  // Create a new list item
   const li = document.createElement('li');
   const formattedDate = new Date(visit.date).toLocaleDateString('fi-FI');
 
@@ -150,8 +186,12 @@ function addVisitToList(visit) {
 
   visitList.appendChild(li);
 
-  // Add a marker on the map for this visit
-  geocodeAddress(visit.address, visit.visitType, visit.answered);
+  // If coordinates are already saved, place marker directly — no geocoding needed
+  if (visit.lat && visit.lon) {
+    addMarkerToMap(visit.lat, visit.lon, visit.visitType, visit.answered, visit.address);
+  } else {
+    geocodeAddress(visit.address, visit.visitType, visit.answered);
+  }
 }
 
 function geocodeAddress(address, visitType, answered) {
@@ -168,19 +208,16 @@ function geocodeAddress(address, visitType, answered) {
       const lat = parseFloat(data[0].lat);
       const lon = parseFloat(data[0].lon);
 
-      const color = visitType === 'leaflet' ? 'blue' :
-                    answered === 'yes' ? 'green' : 'grey';
+      // Save coordinates to the visit in localStorage and server
+      const visitIndex = visits.findIndex(v => v.address === address && !v.lat);
+      if (visitIndex !== -1) {
+        visits[visitIndex].lat = lat;
+        visits[visitIndex].lon = lon;
+        localStorage.setItem('visits', JSON.stringify(visits));
+        saveVisitToServer(visits[visitIndex]);
+      }
 
-      L.circleMarker([lat, lon], {
-        radius: 8,
-        fillColor: color,
-        color: '#fff',
-        weight: 2,
-        opacity: 1,
-        fillOpacity: 0.9
-      })
-      .bindPopup(`<b>${address}</b><br>${visitType === 'leaflet' ? '📬 Leaflet drop' : answered === 'yes' ? '🚪 Answered' : '🚪 No answer'}`)
-      .addTo(map);
+      addMarkerToMap(lat, lon, visitType, answered, address);
     })
     .catch(error => console.log('Geocoding error:', error));
 }
@@ -192,3 +229,26 @@ function loadSavedVisits() {
 }
 
 loadSavedVisits();
+async function saveVisitToServer(visit) {
+  await fetch(`${SERVER}/api/visits`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(visit)
+  });
+}
+
+function addMarkerToMap(lat, lon, visitType, answered, address) {
+  const color = visitType === 'leaflet' ? 'blue' :
+                answered === 'yes' ? 'green' : 'grey';
+
+  L.circleMarker([lat, lon], {
+    radius: 8,
+    fillColor: color,
+    color: '#fff',
+    weight: 2,
+    opacity: 1,
+    fillOpacity: 0.9
+  })
+  .bindPopup(`<b>${address}</b><br>${visitType === 'leaflet' ? '📬 Leaflet drop' : answered === 'yes' ? '🚪 Answered' : '🚪 No answer'}`)
+  .addTo(map);
+}
