@@ -1,2 +1,8 @@
 .env
 node_modules
+visits.json
+districts.geojson
+Aanestysaluejako_PKS_2023.*
+ekv-2023_taat_maa.csv
+ekv-2023_tpat_maa.csv
+Tulokset_otsikkorivit_FI.xlsx

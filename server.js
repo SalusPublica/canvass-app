@@ -10,7 +10,13 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static('.'));
+
+// Hash the team code once when the server starts
+let hashedTeamCode;
+bcrypt.hash(process.env.TEAM_CODE, 10).then(hash => {
+  hashedTeamCode = hash;
+  console.log('Team code hashed and ready');
+});
 
 // Where visits will be saved on the server
 const VISITS_FILE = path.join(__dirname, 'visits.json');
@@ -20,14 +26,7 @@ if (!fs.existsSync(VISITS_FILE)) {
   fs.writeFileSync(VISITS_FILE, JSON.stringify([]));
 }
 
-// Hash the team code once when the server starts
-let hashedTeamCode;
-bcrypt.hash(process.env.TEAM_CODE, 10).then(hash => {
-  hashedTeamCode = hash;
-  console.log('Team code hashed and ready');
-});
-
-// LOGIN — check if the submitted code matches the team code
+// LOGIN
 app.post('/api/login', async (req, res) => {
   const { code } = req.body;
   const match = await bcrypt.compare(code, hashedTeamCode);
@@ -38,13 +37,13 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// GET VISITS — return all saved visits
+// GET VISITS
 app.get('/api/visits', (req, res) => {
   const visits = JSON.parse(fs.readFileSync(VISITS_FILE));
   res.json(visits);
 });
 
-// SAVE VISIT — add a new visit to the list
+// SAVE VISIT
 app.post('/api/visits', (req, res) => {
   const visits = JSON.parse(fs.readFileSync(VISITS_FILE));
   const visit = req.body;
@@ -52,6 +51,15 @@ app.post('/api/visits', (req, res) => {
   fs.writeFileSync(VISITS_FILE, JSON.stringify(visits));
   res.json({ success: true });
 });
+
+// SERVE DISTRICTS GEOJSON
+app.get('/api/districts', (req, res) => {
+  const data = fs.readFileSync(path.join(__dirname, 'districts.geojson'), 'utf-8');
+  res.json(JSON.parse(data));
+});
+
+// Serve frontend files — must be last
+app.use(express.static('.'));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

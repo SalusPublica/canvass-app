@@ -157,3 +157,6 @@ li.answered-no {
 #login-box input {
   margin-bottom: 12px;
 }
+#toggle-voting-layer {
+  margin-bottom: 10px;
+}

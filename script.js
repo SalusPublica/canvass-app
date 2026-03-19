@@ -252,3 +252,54 @@ function addMarkerToMap(lat, lon, visitType, answered, address) {
   .bindPopup(`<b>${address}</b><br>${visitType === 'leaflet' ? '📬 Leaflet drop' : answered === 'yes' ? '🚪 Answered' : '🚪 No answer'}`)
   .addTo(map);
 }
+// Party colours
+const partyColors = {
+  'KOK': '#0047AB',   // Blue - Kokoomus
+  'PS': '#FFD700',    // Yellow - Perussuomalaiset
+  'SDP': '#CC0000',   // Red - SDP
+  'KESK': '#006400',  // Green - Keskusta
+  'VIHR': '#00A550',  // Light green - Vihreät
+  'VAS': '#CC0000',   // Dark red - Vasemmistoliitto
+  'RKP': '#FFFF00',   // Yellow - RKP
+  'KD': '#FF6B00',    // Orange - KD
+};
+
+let votingLayer = null;
+let votingLayerVisible = false;
+
+async function loadVotingLayer() {
+  if (votingLayer) {
+    if (votingLayerVisible) {
+      map.removeLayer(votingLayer);
+      votingLayerVisible = false;
+    } else {
+      votingLayer.addTo(map);
+      votingLayerVisible = true;
+    }
+    return;
+  }
+
+  const response = await fetch(`${SERVER}/api/districts`);
+  const geojson = await response.json();
+
+  votingLayer = L.geoJSON(geojson, {
+    style: function(feature) {
+      const party = feature.properties.winningParty;
+      return {
+        fillColor: partyColors[party] || '#888888',
+        fillOpacity: 0.5,
+        color: '#fff',
+        weight: 1
+      };
+    },
+    onEachFeature: function(feature, layer) {
+      const party = feature.properties.winningParty || 'Unknown';
+      const votes = feature.properties.winningVotes || 0;
+      const name = feature.properties.nimi || '';
+      layer.bindPopup(`<b>${name}</b><br>Winner: ${party}<br>Votes: ${votes}`);
+    }
+  }).addTo(map);
+
+  votingLayerVisible = true;
+}
+document.getElementById('toggle-voting-layer').addEventListener('click', loadVotingLayer);
