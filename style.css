@@ -160,3 +160,32 @@ li.answered-no {
 #toggle-voting-layer {
   margin-bottom: 10px;
 }
+#logout-button {
+  background-color: #aaa;
+  float: right;
+  margin-top: -50px;
+}
+
+#logout-button:hover {
+  background-color: #888;
+}
+#password-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+#password-container input {
+  margin-bottom: 0;
+}
+
+#show-password {
+  margin-top: 0;
+  padding: 8px 10px;
+  background-color: #ddd;
+  color: #333;
+}
+
+#show-password:hover {
+  background-color: #bbb;
+}

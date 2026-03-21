@@ -12,11 +12,11 @@
 
     <!-- LOGIN SCREEN -->
     <div id="login-screen">
-      <div id="login-box">
-        <h2>Canvass Coordinator</h2>
-        <p>Enter your team code to continue</p>
-        <input type="password" id="team-code-input" placeholder="Team code" />
-        <button id="login-button">Enter</button>
+      <div id="password-container">
+  <input type="password" id="team-code-input" placeholder="Team code" />
+  <button type="button" id="show-password">👁</button>
+</div>
+<button id="login-button">Enter</button>
         <p id="login-error" style="display:none; color:red;">Incorrect code. Try again.</p>
       </div>
     </div>
@@ -26,10 +26,13 @@
 
     <h1>Canvass Coordinator</h1>
 
+    <button type="button" id="logout-button">Log out</button>
+
     <!-- MAP -->
     <section id="map-section">
       <h2>Canvassing Map</h2>
       <button type="button" id="toggle-voting-layer">Show 2023 Election Results</button>
+      <button type="button" id="toggle-sdp-layer">Show SDP Vote Share</button>
       <div id="map"></div>
     </section>
 

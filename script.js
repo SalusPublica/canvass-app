@@ -4,6 +4,11 @@ const SERVER = 'http://localhost:3000';
 if (localStorage.getItem('loggedIn') === 'true') {
   showApp();
 }
+document.getElementById('team-code-input').addEventListener('keydown', function(event) {
+  if (event.key === 'Enter') {
+    document.getElementById('login-button').click();
+  }
+});
 
 document.getElementById('login-button').addEventListener('click', async function() {
   const code = document.getElementById('team-code-input').value;
@@ -33,7 +38,12 @@ function showApp() {
 async function loadVisitsFromServer() {
   const response = await fetch(`${SERVER}/api/visits`);
   const serverVisits = await response.json();
-  serverVisits.forEach(visit => addVisitToList(visit));
+  for (const visit of serverVisits) {
+    addVisitToList(visit);
+    if (!visit.lat || !visit.lon) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
 }
 
 // Initialise the map, centred on Helsinki
@@ -223,9 +233,15 @@ function geocodeAddress(address, visitType, answered) {
 }
 
 // Load any previously saved visits when the page opens
-function loadSavedVisits() {
+async function loadSavedVisits() {
   if (visits.length === 0) return;
-  visits.forEach(visit => addVisitToList(visit));
+  for (const visit of visits) {
+    addVisitToList(visit);
+    if (!visit.lat || !visit.lon) {
+      // Wait 1 second between geocoding requests to respect Nominatim's rate limit
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
 }
 
 loadSavedVisits();
@@ -293,13 +309,102 @@ async function loadVotingLayer() {
       };
     },
     onEachFeature: function(feature, layer) {
-      const party = feature.properties.winningParty || 'Unknown';
-      const votes = feature.properties.winningVotes || 0;
       const name = feature.properties.nimi || '';
-      layer.bindPopup(`<b>${name}</b><br>Winner: ${party}<br>Votes: ${votes}`);
+      const winner = feature.properties.winningParty || 'Unknown';
+      const totalVotes = feature.properties.totalVotes || 0;
+      const percentages = feature.properties.partyPercentages || {};
+      const sdp = feature.properties.sdpPercentage || 0;
+
+      const sortedParties = Object.entries(percentages)
+        .filter(([party, pct]) => pct >= 1)
+        .sort((a, b) => b[1] - a[1])
+        .map(([party, pct]) => {
+          const bold = party === 'SDP' ? '<b>' : '';
+          const boldEnd = party === 'SDP' ? '</b>' : '';
+          return `${bold}${party}: ${pct}%${boldEnd}`;
+        })
+        .join('<br>');
+
+      layer.bindPopup(`
+        <b>${name}</b><br>
+        Winner: ${winner}<br>
+        Total votes: ${totalVotes}<br>
+        <b style="color:#CC0000">SDP: ${sdp}%</b><br>
+        <hr>
+        ${sortedParties}
+      `);
     }
   }).addTo(map);
 
   votingLayerVisible = true;
 }
 document.getElementById('toggle-voting-layer').addEventListener('click', loadVotingLayer);
+
+document.getElementById('logout-button').addEventListener('click', function() {
+  localStorage.removeItem('loggedIn');
+  location.reload();
+});
+document.getElementById('show-password').addEventListener('click', function() {
+  const input = document.getElementById('team-code-input');
+  input.type = input.type === 'password' ? 'text' : 'password';
+});
+let sdpLayer = null;
+let sdpLayerVisible = false;
+
+async function loadSdpLayer() {
+  if (sdpLayer) {
+    if (sdpLayerVisible) {
+      map.removeLayer(sdpLayer);
+      sdpLayerVisible = false;
+    } else {
+      sdpLayer.addTo(map);
+      sdpLayerVisible = true;
+    }
+    return;
+  }
+
+  const response = await fetch(`${SERVER}/api/districts`);
+  const geojson = await response.json();
+
+  sdpLayer = L.geoJSON(geojson, {
+    style: function(feature) {
+      const pct = feature.properties.sdpPercentage || 0;
+      // Scale from light pink (0%) to dark red (50%+)
+      const intensity = Math.min(pct / 50, 1);
+      const r = Math.round(204);
+      const g = Math.round(204 * (1 - intensity));
+      const b = Math.round(204 * (1 - intensity));
+      return {
+        fillColor: `rgb(${r},${g},${b})`,
+        fillOpacity: 0.7,
+        color: '#fff',
+        weight: 1
+      };
+    },
+    onEachFeature: function(feature, layer) {
+      const name = feature.properties.nimi || '';
+      const sdp = feature.properties.sdpPercentage || 0;
+      const percentages = feature.properties.partyPercentages || {};
+      const sortedParties = Object.entries(percentages)
+        .filter(([party, pct]) => pct >= 1)
+        .sort((a, b) => b[1] - a[1])
+        .map(([party, pct]) => {
+          const bold = party === 'SDP' ? '<b>' : '';
+          const boldEnd = party === 'SDP' ? '</b>' : '';
+          return `${bold}${party}: ${pct}%${boldEnd}`;
+        })
+        .join('<br>');
+
+      layer.bindPopup(`
+        <b>${name}</b><br>
+        <b style="color:#CC0000">SDP: ${sdp}%</b><br>
+        <hr>
+        ${sortedParties}
+      `);
+    }
+  }).addTo(map);
+
+  sdpLayerVisible = true;
+}
+
+document.getElementById('toggle-sdp-layer').addEventListener('click', loadSdpLayer);
