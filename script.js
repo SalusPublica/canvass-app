@@ -1,4 +1,4 @@
-const SERVER = 'http://localhost:3000';
+const SERVER = window.location.origin;
 
 // Check if already logged in
 if (localStorage.getItem('loggedIn') === 'true') {
