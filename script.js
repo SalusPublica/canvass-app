@@ -408,3 +408,82 @@ async function loadSdpLayer() {
 }
 
 document.getElementById('toggle-sdp-layer').addEventListener('click', loadSdpLayer);
+let turnoutLayer = null;
+let turnoutLayerVisible = false;
+
+async function loadTurnoutLayer() {
+  if (turnoutLayer) {
+    if (turnoutLayerVisible) {
+      map.removeLayer(turnoutLayer);
+      turnoutLayerVisible = false;
+    } else {
+      turnoutLayer.addTo(map);
+      turnoutLayerVisible = true;
+    }
+    return;
+  }
+
+  const response = await fetch(`${SERVER}/api/districts`);
+  const geojson = await response.json();
+
+  turnoutLayer = L.geoJSON(geojson, {
+    style: function(feature) {
+      const pct = feature.properties.turnoutPct || 0;
+
+      function interpolateColor(pct) {
+        // Define colour stops: [percentage, r, g, b]
+        const stops = [
+          [0,   220, 0,   0  ],  // red
+          [50,  230, 120, 0  ],  // orange
+          [75,  255, 210, 0  ],  // yellow
+          [100, 0,   180, 0  ],  // green
+        ];
+
+        // Find the two stops to interpolate between
+        let lower = stops[0];
+        let upper = stops[stops.length - 1];
+
+        for (let i = 0; i < stops.length - 1; i++) {
+          if (pct >= stops[i][0] && pct <= stops[i + 1][0]) {
+            lower = stops[i];
+            upper = stops[i + 1];
+            break;
+          }
+        }
+
+        // Calculate how far between the two stops we are (0 to 1)
+        const range = upper[0] - lower[0];
+        const t = range === 0 ? 0 : (pct - lower[0]) / range;
+
+        // Interpolate each colour channel
+        const r = Math.round(lower[1] + t * (upper[1] - lower[1]));
+        const g = Math.round(lower[2] + t * (upper[2] - lower[2]));
+        const b = Math.round(lower[3] + t * (upper[3] - lower[3]));
+
+        return `rgb(${r},${g},${b})`;
+      }
+
+      return {
+        fillColor: interpolateColor(pct),
+        fillOpacity: 0.7,
+        color: '#fff',
+        weight: 1
+      };
+    },
+    onEachFeature: function(feature, layer) {
+      const name = feature.properties.nimi || '';
+      const turnout = feature.properties.turnoutPct || 0;
+      const eligible = feature.properties.eligibleVoters || 0;
+      const voted = feature.properties.totalVoted || 0;
+      layer.bindPopup(`
+        <b>${name}</b><br>
+        <b>Turnout: ${turnout}%</b><br>
+        Voted: ${voted} / ${eligible}
+      `);
+    }
+  }).addTo(map);
+
+  turnoutLayerVisible = true;
+}
+
+document.getElementById('toggle-turnout-layer').addEventListener('click', loadTurnoutLayer);
