@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  canvass-app:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./visits.json:/app/visits.json
+      - ./districts.geojson:/app/districts.geojson
+    environment:
+      - TEAM_CODE=${TEAM_CODE}
+      - PORT=3000
+    restart: unless-stopped
