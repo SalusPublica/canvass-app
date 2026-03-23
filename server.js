@@ -79,6 +79,26 @@ app.post('/api/visits/:teamName', (req, res) => {
   res.json({ success: true });
 });
 
+// EDIT A VISIT
+app.put('/api/visits/:teamName/:id', (req, res) => {
+  const file = ensureVisitsFile(req.params.teamName);
+  const visits = JSON.parse(fs.readFileSync(file));
+  const index = visits.findIndex(v => v.id === req.params.id);
+  if (index === -1) return res.status(404).json({ success: false });
+  visits[index] = { ...visits[index], ...req.body };
+  fs.writeFileSync(file, JSON.stringify(visits));
+  res.json({ success: true });
+});
+
+// DELETE A SINGLE VISIT
+app.delete('/api/visits/:teamName/:id', (req, res) => {
+  const file = ensureVisitsFile(req.params.teamName);
+  let visits = JSON.parse(fs.readFileSync(file));
+  visits = visits.filter(v => v.id !== req.params.id);
+  fs.writeFileSync(file, JSON.stringify(visits));
+  res.json({ success: true });
+});
+
 // SERVE DISTRICTS GEOJSON
 app.get('/api/districts', (req, res) => {
   const data = fs.readFileSync(path.join(__dirname, 'districts.geojson'), 'utf-8');

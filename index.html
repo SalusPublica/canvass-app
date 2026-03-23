@@ -3,109 +3,189 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Canvass App</title>
-    <link rel="stylesheet" href="style.css" />
+    <title>Canvass Coordinator</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   </head>
   <body>
 
-<!-- LOGIN SCREEN -->
+    <!-- LOGIN SCREEN -->
     <div id="login-screen">
       <div id="login-box">
-        <h2>Canvass Coordinator</h2>
-        <p>Enter your team name and code to continue</p>
-        <input type="text" id="team-name-input" placeholder="Team name" />
-        <div id="password-container">
-          <input type="password" id="team-code-input" placeholder="Team code" />
-          <button type="button" id="show-password">👁</button>
+        <div id="login-header">
+          <div id="login-logo">●</div>
+          <h1>Canvass</h1>
+          <p>Campaign coordination tool</p>
         </div>
-        <button id="login-button">Enter</button>
-        <p id="login-error" style="display:none; color:red;">Incorrect team name or code.</p>
+        <div id="login-form">
+          <div class="mb-3">
+            <label class="form-label">Team name</label>
+            <input type="text" id="team-name-input" class="form-control" placeholder="Enter your team name" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Team code</label>
+            <div id="password-container">
+              <input type="password" id="team-code-input" class="form-control" placeholder="Enter team code" />
+              <button type="button" id="show-password" class="btn">👁</button>
+            </div>
+          </div>
+          <button id="login-button" class="btn btn-primary w-100">Sign in</button>
+          <p id="login-error" class="mt-2 text-danger" style="display:none;">Incorrect team name or code.</p>
+        </div>
       </div>
     </div>
 
-    <!-- MAIN APP (hidden until logged in) -->
+    <!-- MAIN APP -->
     <div id="main-app" style="display:none;">
 
-    <h1>Canvass Coordinator</h1>
+      <!-- NAVBAR -->
+      <nav id="main-nav" class="navbar">
+        <div class="container-fluid">
+          <span class="navbar-brand">● Canvass</span>
+          <div class="d-flex align-items-center gap-2">
+            <span id="team-label" class="team-badge"></span>
+            <button type="button" id="logout-button" class="btn btn-outline-light btn-sm">Log out</button>
+          </div>
+        </div>
+      </nav>
 
-    <button type="button" id="logout-button">Log out</button>
+      <!-- MAIN CONTENT -->
+      <div class="container-fluid mt-3">
+        <div class="row g-3">
 
-    <!-- MAP -->
-    <section id="map-section">
-      <h2>Canvassing Map</h2>
-      <button type="button" id="toggle-voting-layer">Show 2023 Election Results</button>
-      <button type="button" id="toggle-sdp-layer">Show SDP Vote Share</button>
-      <button type="button" id="toggle-turnout-layer">Show Voter Turnout</button>
-      <div id="map"></div>
-    </section>
+          <!-- MAP COLUMN -->
+          <div class="col-lg-8">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="card-title">Map</span>
+                <div class="d-flex gap-2 flex-wrap">
+                  <button type="button" id="toggle-voting-layer" class="btn btn-outline-secondary btn-sm">2023 Results</button>
+                  <button type="button" id="toggle-sdp-layer" class="btn btn-outline-danger btn-sm">SDP Vote Share</button>
+                  <button type="button" id="toggle-turnout-layer" class="btn btn-outline-secondary btn-sm">Turnout</button>
+                </div>
+              </div>
+              <div class="card-body p-0">
+                <div id="map"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SIDEBAR COLUMN -->
+          <div class="col-lg-4">
+
+            <!-- LOG A VISIT FORM -->
+            <div class="card mb-3">
+              <div class="card-header">
+                <span class="card-title">Log a visit</span>
+              </div>
+              <div class="card-body">
+                <form id="visit-form">
+                  <div class="mb-3">
+                    <label class="form-label">Address</label>
+                    <input type="text" id="address" class="form-control" placeholder="e.g. Mannerheimintie 5" required />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Date</label>
+                    <input type="date" id="date" class="form-control" required />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Type of visit</label>
+                    <select id="visit-type" class="form-select">
+                      <option value="knock">Door knock</option>
+                      <option value="leaflet">Leaflet drop</option>
+                    </select>
+                  </div>
+                  <div class="mb-3" id="answered-container">
+                    <label class="form-label" id="answered-label">Did anyone answer?</label>
+                    <select id="answered" class="form-select">
+                      <option value="yes">Yes</option>
+                      <option value="no">No</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="btn btn-primary w-100">Log Visit</button>
+                </form>
+              </div>
+            </div>
+
+            <!-- VISIT LIST -->
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">Visits logged</span>
+              </div>
+              <div class="card-body p-0">
+                <ul id="visit-list" class="list-group list-group-flush">
+                  <li class="list-group-item text-muted" id="empty-message">No visits logged yet.</li>
+                </ul>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
 
     <!-- MAP CLICK POPUP -->
     <div id="map-popup" style="display:none;">
       <div id="map-popup-inner">
-        <h3>Log a visit</h3>
-        <p id="map-popup-address">Fetching address...</p>
-
-        <label for="map-visit-type">Type of visit</label>
-        <select id="map-visit-type">
-          <option value="knock">Door knock</option>
-          <option value="leaflet">Leaflet drop</option>
-        </select>
-
-        <div id="map-answered-container">
-          <label for="map-answered">Did anyone answer?</label>
-          <select id="map-answered">
+        <h5 class="mb-3">Log a visit</h5>
+        <p id="map-popup-address" class="text-muted small">Fetching address...</p>
+        <div class="mb-3">
+          <label class="form-label">Type of visit</label>
+          <select id="map-visit-type" class="form-select">
+            <option value="knock">Door knock</option>
+            <option value="leaflet">Leaflet drop</option>
+          </select>
+        </div>
+        <div id="map-answered-container" class="mb-3">
+          <label class="form-label">Did anyone answer?</label>
+          <select id="map-answered" class="form-select">
             <option value="yes">Yes</option>
             <option value="no">No</option>
           </select>
         </div>
-
-        <div id="map-popup-buttons">
-          <button id="map-popup-confirm">Log Visit</button>
-          <button id="map-popup-cancel">Cancel</button>
+        <div class="d-flex gap-2">
+          <button id="map-popup-confirm" class="btn btn-primary flex-grow-1">Log Visit</button>
+          <button id="map-popup-cancel" class="btn btn-outline-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+    
+<!-- EDIT VISIT POPUP -->
+    <div id="edit-popup" style="display:none;">
+      <div id="edit-popup-inner">
+        <h5 class="mb-3">Edit visit</h5>
+        <p id="edit-popup-address" class="text-muted small"></p>
+        <div class="mb-3">
+          <label class="form-label">Date</label>
+          <input type="date" id="edit-date" class="form-control" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Type of visit</label>
+          <select id="edit-visit-type" class="form-select">
+            <option value="knock">Door knock</option>
+            <option value="leaflet">Leaflet drop</option>
+          </select>
+        </div>
+        <div id="edit-answered-container" class="mb-3">
+          <label class="form-label">Did anyone answer?</label>
+          <select id="edit-answered" class="form-select">
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+        <div class="d-flex gap-2">
+          <button id="edit-popup-save" class="btn btn-primary flex-grow-1">Save</button>
+          <button id="edit-popup-cancel" class="btn btn-outline-secondary">Cancel</button>
         </div>
       </div>
     </div>
 
-    <!-- VISIT LOGGING FORM -->
-    <section id="log-section">
-      <h2>Log a Visit</h2>
-      <form id="visit-form">
-
-        <label for="address">Address</label>
-        <input type="text" id="address" placeholder="e.g. Mannerheimintie 5" required />
-
-        <label for="date">Date</label>
-        <input type="date" id="date" required />
-
-        <label for="visit-type">Type of visit</label>
-        <select id="visit-type">
-          <option value="knock">Door knock</option>
-          <option value="leaflet">Leaflet drop</option>
-        </select>
-
-        <label for="answered" id="answered-label">Did anyone answer?</label>
-        <select id="answered">
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
-
-        <button type="submit">Log Visit</button>
-
-      </form>
-    </section>
-
-    <!-- VISIT LIST -->
-    <section id="visits-section">
-      <h2>Visits Logged</h2>
-      <ul id="visit-list">
-        <p id="empty-message">No visits logged yet.</p>
-      </ul>
-    </section>
-
-    </div> <!-- end main-app -->
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
