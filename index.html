@@ -10,14 +10,18 @@
   </head>
   <body>
 
-    <!-- LOGIN SCREEN -->
+<!-- LOGIN SCREEN -->
     <div id="login-screen">
-      <div id="password-container">
-  <input type="password" id="team-code-input" placeholder="Team code" />
-  <button type="button" id="show-password">👁</button>
-</div>
-<button id="login-button">Enter</button>
-        <p id="login-error" style="display:none; color:red;">Incorrect code. Try again.</p>
+      <div id="login-box">
+        <h2>Canvass Coordinator</h2>
+        <p>Enter your team name and code to continue</p>
+        <input type="text" id="team-name-input" placeholder="Team name" />
+        <div id="password-container">
+          <input type="password" id="team-code-input" placeholder="Team code" />
+          <button type="button" id="show-password">👁</button>
+        </div>
+        <button id="login-button">Enter</button>
+        <p id="login-error" style="display:none; color:red;">Incorrect team name or code.</p>
       </div>
     </div>
 

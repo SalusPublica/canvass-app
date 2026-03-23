@@ -1,32 +1,59 @@
 const SERVER = window.location.origin;
 
-// Check if already logged in
-if (localStorage.getItem('loggedIn') === 'true') {
-  showApp();
-}
-document.getElementById('team-code-input').addEventListener('keydown', function(event) {
-  if (event.key === 'Enter') {
-    document.getElementById('login-button').click();
+document.addEventListener('DOMContentLoaded', function() {
+  // Check if already logged in
+  if (localStorage.getItem('loggedIn') === 'true' && localStorage.getItem('teamName')) {
+    showApp();
   }
-});
 
-document.getElementById('login-button').addEventListener('click', async function() {
-  const code = document.getElementById('team-code-input').value;
-
-  const response = await fetch(`${SERVER}/api/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code })
+  // Enter key to log in
+  document.getElementById('team-code-input').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+      document.getElementById('login-button').click();
+    }
   });
 
-  const data = await response.json();
+  // Login button
+  document.getElementById('login-button').addEventListener('click', async function() {
+    const teamName = document.getElementById('team-name-input').value.trim();
+    const code = document.getElementById('team-code-input').value;
 
-  if (data.success) {
-    localStorage.setItem('loggedIn', 'true');
-    showApp();
-  } else {
-    document.getElementById('login-error').style.display = 'block';
-  }
+    if (!teamName) {
+      document.getElementById('login-error').textContent = 'Please enter a team name.';
+      document.getElementById('login-error').style.display = 'block';
+      return;
+    }
+
+    const response = await fetch(`${SERVER}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ teamName, code })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      localStorage.setItem('loggedIn', 'true');
+      localStorage.setItem('teamName', data.teamName);
+      showApp();
+    } else {
+      document.getElementById('login-error').textContent = data.message || 'Incorrect team name or code.';
+      document.getElementById('login-error').style.display = 'block';
+    }
+  });
+
+  // Show/hide password
+  document.getElementById('show-password').addEventListener('click', function() {
+    const input = document.getElementById('team-code-input');
+    input.type = input.type === 'password' ? 'text' : 'password';
+  });
+
+  // Logout
+  document.getElementById('logout-button').addEventListener('click', function() {
+    localStorage.removeItem('loggedIn');
+    localStorage.removeItem('teamName');
+    location.reload();
+  });
 });
 
 function showApp() {
@@ -36,7 +63,8 @@ function showApp() {
 }
 
 async function loadVisitsFromServer() {
-  const response = await fetch(`${SERVER}/api/visits`);
+  const teamName = localStorage.getItem('teamName');
+  const response = await fetch(`${SERVER}/api/visits/${encodeURIComponent(teamName)}`);
   const serverVisits = await response.json();
   for (const visit of serverVisits) {
     addVisitToList(visit);
@@ -246,7 +274,8 @@ async function loadSavedVisits() {
 
 loadSavedVisits();
 async function saveVisitToServer(visit) {
-  await fetch(`${SERVER}/api/visits`, {
+  const teamName = localStorage.getItem('teamName');
+  await fetch(`${SERVER}/api/visits/${encodeURIComponent(teamName)}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(visit)
@@ -342,6 +371,7 @@ document.getElementById('toggle-voting-layer').addEventListener('click', loadVot
 
 document.getElementById('logout-button').addEventListener('click', function() {
   localStorage.removeItem('loggedIn');
+  localStorage.removeItem('teamName');
   location.reload();
 });
 document.getElementById('show-password').addEventListener('click', function() {
