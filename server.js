@@ -1,3 +1,10 @@
+// Copyright (c) 2025 [SalusPublica]
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// See LICENSE file or <https://www.gnu.org/licenses/> for details.
+
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
