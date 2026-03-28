@@ -1,0 +1,76 @@
+THIRD PARTY LICENSES
+====================
+
+This application makes use of the following open source libraries and data sources:
+
+LIBRARIES
+---------
+
+Express - MIT License
+https://github.com/expressjs/express
+Copyright (c) 2009-2014 TJ Holowaychuk, 2013-2014 Roman Shtylman, 2014-2015 Douglas Christopher Wilson
+
+Helmet - MIT License
+https://github.com/helmetjs/helmet
+Copyright (c) 2012-2024 Evan Hahn, Adam Baldwin
+
+CORS - MIT License
+https://github.com/expressjs/cors
+Copyright (c) 2013 Troy Goode
+
+bcrypt - MIT License
+https://github.com/kelektiv/node.bcrypt.js
+Copyright (c) 2010 Nicholas Campbell
+
+dotenv - BSD-2-Clause License
+https://github.com/motdotla/dotenv
+Copyright (c) 2015 Scott Motte
+
+express-rate-limit - MIT License
+https://github.com/express-rate-limit/express-rate-limit
+Copyright (c) 2022 Nathan Friedly, Vedant K
+
+express-validator - MIT License
+https://github.com/express-validator/express-validator
+Copyright (c) 2010 Chris O'Hara
+
+Leaflet - BSD-2-Clause License
+https://github.com/Leaflet/Leaflet
+Copyright (c) 2010-2023 Vladimir Agafonkin, (c) 2010-2011 CloudMade
+
+Bootstrap - MIT License
+https://github.com/twbs/bootstrap
+Copyright (c) 2011-2024 The Bootstrap Authors
+
+IBM Plex Sans & IBM Plex Mono - SIL Open Font License 1.1
+https://github.com/IBM/plex
+Copyright (c) 2017 IBM Corp.
+
+shapefile - BSD-3-Clause License
+https://github.com/mbostock/shapefile
+Copyright (c) 2012-2023 Mike Bostock
+
+proj4js - MIT License
+https://github.com/proj4js/proj4js
+Copyright (c) 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral, Calvin Metcalf
+
+DATA SOURCES
+------------
+
+Map tiles - © OpenStreetMap contributors
+https://www.openstreetmap.org/copyright
+Licensed under the Open Data Commons Open Database License (ODbL)
+
+Geocoding - Nominatim © OpenStreetMap contributors
+https://nominatim.openstreetmap.org
+Licensed under the Open Data Commons Open Database License (ODbL)
+
+Finnish Parliamentary Election Results 2023
+© Statistics Finland and Ministry of Justice of Finland
+https://tulospalvelu.vaalit.fi
+Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+Finnish Polling District Boundaries 2023
+© Ministry of Justice of Finland
+https://tulospalvelu.vaalit.fi
+Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0)
