@@ -1,7 +1,8 @@
-GNU AFFERO GENERAL PUBLIC LICENSE
-Version 3, 19 November 2007
+GNU Affero General Public License v3.0
+=======================================
 
-Copyright (C) 2025 [Your Name / Your Party Name]
+Copyright (c) 2025 [SalusPublica]
+Original repository: [https://github.com/SalusPublica/canvass-app]
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -16,6 +17,16 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-ADDITIONAL RESTRICTION:
-This software may not be sold or offered as a paid service in any form.
-It must always be provided free of charge to end users.
+---
+
+ADDITIONAL PERMISSION — HOSTING SERVICES:
+You are permitted to offer this software as a hosted service and charge
+a fee to cover infrastructure and operational costs, provided that:
+
+1. The fee charged does not exceed reasonable hosting and operational costs.
+2. The source code of any modified version is made publicly available
+   under this same license.
+3. Users of the hosted service are informed of their right to obtain and
+   self-host the software free of charge.
+
+This additional permission does not override any terms of the AGPL-3.0.
