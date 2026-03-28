@@ -223,8 +223,7 @@ nano teams.json
 Add a new entry to the array:
 ```json
 [
-  { "name": "Helsinki Central", "code": "secretcode1" },
-  { "name": "Espoo North", "code": "secretcode2" }
+    { "name": "Your Team Name", "code": "your-secret-code" }
 ]
 ```
 
@@ -284,16 +283,11 @@ under GDPR. Your responsibilities include:
 
 ### Hosting location
 
-For Finnish campaigns, hosting on EU-based servers is strongly recommended.
-Hetzner (Germany/Finland) and UpCloud (Finland) are good options.
-
-### Consulting a legal expert
-
-Canvassing data may involve special category data under GDPR depending on
-what is collected. Before extending this software to collect sentiment,
-political opinions, or any other data about contacted individuals, consult
-a data protection officer or legal expert familiar with Finnish and EU
-data protection law.
+For campaigns operating within the EU, hosting on EU-based servers is strongly
+recommended. This ensures your data remains subject to GDPR and does not cross
+into jurisdictions with weaker data protection laws. Hetzner (Germany/Finland)
+and UpCloud (Finland) are good options, but any reputable EU-based provider
+will work.
 
 ---
 
