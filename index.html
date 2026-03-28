@@ -46,6 +46,10 @@
       <nav id="main-nav" class="navbar">
         <div class="container-fluid">
           <span class="navbar-brand">● Canvass</span>
+<div class="d-flex gap-2">
+  <button type="button" id="nav-map" class="btn btn-light btn-sm">Map</button>
+  <button type="button" id="nav-stats" class="btn btn-outline-light btn-sm">Statistics</button>
+</div>
           <div class="d-flex align-items-center gap-2">
             <span id="team-label" class="team-badge"></span>
             <button type="button" id="logout-button" class="btn btn-outline-light btn-sm">Log out</button>
@@ -54,8 +58,9 @@
       </nav>
 
       <!-- MAIN CONTENT -->
-      <div class="container-fluid mt-3">
-        <div class="row g-3">
+      <div id="main-content">
+  <div class="container-fluid mt-3">
+    <div class="row g-3">
 
           <!-- MAP COLUMN -->
           <div class="col-lg-8">
@@ -126,7 +131,79 @@
           </div>
         </div>
       </div>
+</div><!-- end row -->
+  </div><!-- end container -->
+</div><!-- end main-content -->
 
+      <!-- STATISTICS PAGE -->
+      <div id="stats-page" style="display:none;">
+        <div class="container-fluid mt-3">
+
+          <!-- Date filter -->
+          <div class="card mb-3">
+            <div class="card-header">
+              <span class="card-title">Filter by date</span>
+            </div>
+            <div class="card-body">
+              <div class="row g-2 align-items-end">
+                <div class="col-auto">
+                  <label class="form-label">From</label>
+                  <input type="date" id="stats-date-from" class="form-control" />
+                </div>
+                <div class="col-auto">
+                  <label class="form-label">To</label>
+                  <input type="date" id="stats-date-to" class="form-control" />
+                </div>
+                <div class="col-auto">
+                  <button type="button" id="stats-filter-btn" class="btn btn-primary">Apply</button>
+                  <button type="button" id="stats-reset-btn" class="btn btn-outline-secondary ms-2">Reset</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Statistics cards -->
+          <div class="row g-3">
+            <div class="col-sm-6 col-lg-3">
+              <div class="card stat-card">
+                <div class="card-body">
+                  <div class="stat-label">Door knocks</div>
+                  <div class="stat-value" id="stat-knocks">0</div>
+                  <div class="stat-desc">Total doors knocked</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+              <div class="card stat-card">
+                <div class="card-body">
+                  <div class="stat-label">Conversations</div>
+                  <div class="stat-value" id="stat-conversations">0</div>
+                  <div class="stat-desc">Doors answered</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+              <div class="card stat-card">
+                <div class="card-body">
+                  <div class="stat-label">Flyers handed out</div>
+                  <div class="stat-value" id="stat-flyers">0</div>
+                  <div class="stat-desc">Leaflet drops logged</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+              <div class="card stat-card">
+                <div class="card-body">
+                  <div class="stat-label">Outreach</div>
+                  <div class="stat-value" id="stat-outreach">0</div>
+                  <div class="stat-desc">Unique addresses reached</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
     </div>
 
     <!-- MAP CLICK POPUP -->

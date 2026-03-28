@@ -245,3 +245,32 @@ body {
   line-height: 1.5;
   border-radius: 3px;
 }
+
+/* ── Statistics ── */
+.stat-card {
+  border-top: 3px solid var(--sdp-red);
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--mid-grey);
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 48px;
+  font-weight: 600;
+  color: var(--sdp-red);
+  line-height: 1;
+  margin-bottom: 8px;
+  font-family: var(--font-mono);
+}
+
+.stat-desc {
+  font-size: 12px;
+  color: var(--mid-grey);
+}

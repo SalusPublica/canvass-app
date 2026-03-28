@@ -462,6 +462,98 @@ async function loadTurnoutLayer() {
   turnoutLayerVisible = true;
 }
 
-document.getElementById('toggle-voting-layer').addEventListener('click', loadVotingLayer);
-document.getElementById('toggle-sdp-layer').addEventListener('click', loadSdpLayer);
-document.getElementById('toggle-turnout-layer').addEventListener('click', loadTurnoutLayer);
+document.getElementById('toggle-voting-layer').addEventListener('click', function() {
+  hideAllLayersExcept('voting');
+  loadVotingLayer();
+});
+
+document.getElementById('toggle-sdp-layer').addEventListener('click', function() {
+  hideAllLayersExcept('sdp');
+  loadSdpLayer();
+});
+
+document.getElementById('toggle-turnout-layer').addEventListener('click', function() {
+  hideAllLayersExcept('turnout');
+  loadTurnoutLayer();
+});
+
+function hideAllLayersExcept(keep) {
+  if (keep !== 'voting' && votingLayer && votingLayerVisible) {
+    map.removeLayer(votingLayer);
+    votingLayerVisible = false;
+  }
+  if (keep !== 'sdp' && sdpLayer && sdpLayerVisible) {
+    map.removeLayer(sdpLayer);
+    sdpLayerVisible = false;
+  }
+  if (keep !== 'turnout' && turnoutLayer && turnoutLayerVisible) {
+    map.removeLayer(turnoutLayer);
+    turnoutLayerVisible = false;
+  }
+}
+
+// ── Statistics ─────────────────────────────────────────
+const mapPage = document.getElementById('main-content');
+
+document.getElementById('nav-map').addEventListener('click', function() {
+  document.getElementById('main-content').style.display = 'block';
+  document.getElementById('stats-page').style.display = 'none';
+  document.getElementById('nav-map').classList.replace('btn-outline-light', 'btn-light');
+  document.getElementById('nav-stats').classList.replace('btn-light', 'btn-outline-light');
+  map.invalidateSize();
+});
+
+document.getElementById('nav-stats').addEventListener('click', function() {
+  document.getElementById('main-content').style.display = 'none';
+  document.getElementById('stats-page').style.display = 'block';
+  document.getElementById('nav-stats').classList.replace('btn-outline-light', 'btn-light');
+  document.getElementById('nav-map').classList.replace('btn-light', 'btn-outline-light');
+  calculateStats(visits);
+});
+
+document.getElementById('stats-filter-btn').addEventListener('click', function() {
+  const from = document.getElementById('stats-date-from').value;
+  const to = document.getElementById('stats-date-to').value;
+
+  let filtered = visits;
+
+  if (from) {
+    filtered = filtered.filter(v => v.date >= from);
+  }
+  if (to) {
+    filtered = filtered.filter(v => v.date <= to);
+  }
+
+  calculateStats(filtered);
+});
+
+document.getElementById('stats-reset-btn').addEventListener('click', function() {
+  document.getElementById('stats-date-from').value = '';
+  document.getElementById('stats-date-to').value = '';
+  calculateStats(visits);
+});
+
+function calculateStats(data) {
+  // Total door knocks — all visits logged as knock regardless of outcome
+  const knocks = data.filter(v => v.visitType === 'knock').length;
+
+  // Conversations — door knocks where someone answered
+  const conversations = data.filter(v => v.visitType === 'knock' && v.answered === 'yes').length;
+
+  // Flyers — all leaflet drops
+  const flyers = data.filter(v => v.visitType === 'leaflet').length;
+
+  // Outreach — unique addresses where someone answered OR a leaflet was dropped
+  const reachedAddresses = new Set(
+    data
+      .filter(v => v.visitType === 'leaflet' || (v.visitType === 'knock' && v.answered === 'yes'))
+      .map(v => v.address.toLowerCase().trim())
+  );
+  const outreach = reachedAddresses.size;
+
+  // Update the UI
+  document.getElementById('stat-knocks').textContent = knocks;
+  document.getElementById('stat-conversations').textContent = conversations;
+  document.getElementById('stat-flyers').textContent = flyers;
+  document.getElementById('stat-outreach').textContent = outreach;
+}

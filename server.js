@@ -14,6 +14,9 @@ const app = express();
 
 // Sets secure HTTP headers
 app.use(helmet({
+  referrerPolicy: {
+    policy: 'strict-origin-when-cross-origin'
+  },
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
